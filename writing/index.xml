@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Writings on Justin Huang</title>
+    <link>https://www.rawrjustin.com/writing/</link>
+    <description>Recent content in Writings on Justin Huang</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 18 Mar 2014 00:26:49 -0700</lastBuildDate>
+    
+	<atom:link href="https://www.rawrjustin.com/writing/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Monte Carlo Simulations of Bitcoin Options</title>
+      <link>https://www.rawrjustin.com/writing/julia-vs-python/</link>
+      <pubDate>Tue, 18 Mar 2014 00:26:49 -0700</pubDate>
+      
+      <guid>https://www.rawrjustin.com/writing/julia-vs-python/</guid>
+      <description>I was introduced to Julia recently after hearing of Stefan Karpinski while attending HackerSchool. Julia is marketed as a super fast high performance scientific computing language that can reach speeds close to native C code. After attending a conference for Python quants in NYC and heard Dr. Yves J. Hilpisch speak on the speed of Python for financial analytics I decided to put Julia up against the python/numpy stack.</description>
+    </item>
+    
+  </channel>
+</rss>

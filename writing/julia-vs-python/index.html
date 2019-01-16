@@ -1,0 +1,421 @@
+<!DOCTYPE HTML>
+
+<!-- 
+Strata by HTML5 UP
+html5up.net | @n33co
+Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>Monte Carlo Simulations of Bitcoin Options &middot; Justin Huang</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="author" content="Justin Huang">
+		<meta name="description" content="for 🎉 and 💰">
+		<meta http-equiv="content-language" content="en-us" />
+
+		
+		<meta property="og:site_name" content="Justin Huang">
+		<meta property="og:type"   content="website" />
+		<meta property="og:title" content="Monte Carlo Simulations of Bitcoin Options">
+		<meta property="og:url" content="https://www.rawrjustin.com/writing/julia-vs-python/">
+		<meta property="og:image" content="https://www.rawrjustin.com/writing/julia-vs-python/julia-hero.png">
+		
+		
+		<meta property="og:description" content="I was introduced to Julia recently after hearing of Stefan Karpinski while attending HackerSchool. Julia is marketed as a super fast high performance scientific computing language that can reach speeds close to native C code.">
+		
+
+		<meta name="generator" content="Hugo 0.53" />
+
+		<!--[if lte IE 8]><script src='https://www.rawrjustin.com/js/ie/html5shiv.js'></script><![endif]-->
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" type="text/css">
+		<link rel="stylesheet" href="https://www.rawrjustin.com/css/main.css" />
+		<link rel="stylesheet" href="https://www.rawrjustin.com/css/fonts.css" />
+    
+		
+		<!--[if lte IE 8]><link rel="stylesheet" href="https://www.rawrjustin.com//css/ie8.css"><![endif]-->
+
+		
+		
+		<link rel="canonical" href="https://www.rawrjustin.com/writing/julia-vs-python/" />
+	</head>
+
+	<body id="top">
+		<!-- Header -->
+<header id="header">
+	<a href="https://www.rawrjustin.com/" class="image avatar"><img src="https://www.rawrjustin.com/images/avatar.jpg" alt="" /></a>
+  
+		<section>
+			
+				<div class="center">Hi, I&rsquo;m <strong>Justin</strong>.<br>I create 💩 for 🎉 and 💰.</div>
+			
+		</section>
+
+	<!-- Footer -->
+	<footer id="footer">
+
+		<ul class="icons">
+			
+			<li><a href="//snapchat.com/add/rawrjustinn" target="_blank" class="icon fa-snapchat-ghost"><span class="label">Snapchat</span></a></li>
+			
+			
+			
+			<li><a href="//twitter.com/rawrjustin" target="_blank" class="icon fa-twitter"><span class="label">Twitter</span></a></li>
+			
+			
+			<li><a href="//github.com/rawrjustin" target="_blank" class="icon fa-github"><span class="label">Github</span></a></li>
+			
+			
+			<li><a href="//linkedin.com/in/rawrjustin" target="_blank" class="icon fa-linkedin-square"><span class="label">Linkedin</span></a></li>
+			
+			
+			
+			
+			<li><a href="mailto:justin@rawrjustin.com" class="icon fa-envelope-o"><span class="label">Email</span></a></li>
+			
+			
+		</ul>
+	</footer>
+
+</header>
+
+		<!-- Main -->
+		<div id="main">
+			
+	<span style="text-align:center">
+		<h1>Monte Carlo Simulations of Bitcoin Options</h1>
+
+		<center>
+
+<time datetime="2014-03-18 00:26:49 -0700 PDT">Mar 18, 2014</time>&nbsp;&nbsp;
+
+
+    
+    
+
+
+
+   
+   
+
+</center>
+
+	</span>
+
+	<p>
+	    
+
+<p>I was introduced to <a href="http://julialang.org/">Julia</a> recently after hearing of Stefan Karpinski while attending HackerSchool. Julia is marketed as a super fast high performance scientific computing language that can reach speeds close to native C code. After attending a conference for Python quants in NYC and heard Dr. Yves J. Hilpisch speak on the speed of Python for financial analytics I decided to put Julia up against the python/numpy stack.</p>
+
+<p>This isn’t so much a boxing match between Julia and Python but rather an exercise in solving the same problem in two languages and comparing them. I’ve attached relevant ipython/ijulia code files below so you can play with the code if you’d like.</p>
+
+<h2 id="monty-python-bitcoin-what">Monty Python Bitcoin what</h2>
+
+<p>I’ll try to give a short explanation of everything involved. Basically I’m going to solve the classic options pricing problem with Monte Carlo Simulations in both Julia and Python and compare and contrast the approach taken in the two languages.</p>
+
+<h3 id="monte-carlo">Monte Carlo</h3>
+
+<p>A Monte Carlo simulation is a stochastic technique, meaning it uses a random probability distribution to simulate complex systems by repeated sampling – typically over extremely large numbers of samplings for accuracy.</p>
+
+<p>A simple conceptual example is playing craps (my preferred method of throwing away money) repeatedly at a casino and recording your results to find specific odds of certain bets.</p>
+
+<h3 id="bitcoin-option">Bitcoin Option</h3>
+
+<p>When I say bitcoin options I mean a theoretical bitcoin stock option in the style of a European call option because anything with bitcoins make things more interesting (+ gets more clicks).</p>
+
+<h3 id="geometric-brownian-motion">Geometric Brownian Motion</h3>
+
+<p>There is a financial theory that says stock prices follow a random walk up or down and therefore cannot be predicted. So with this hypothesis, we want to value a bitcoin european call option by Monte Carlo Simulation and thus simulate the movement of bitcoin price with a random walk – in this case geometric Brownian motion (just think of it as a fancy method of simulating continuous random changes in value).</p>
+
+<h3 id="stock-pricing-model">Stock Pricing Model</h3>
+
+<p>We assume Bitcoin prices follows the <a href="https://en.wikipedia.org/wiki/Efficient-market_hypothesis">Efficient Market Hypothesis</a> and thus a Markov process.</p>
+
+<p>The relevant parameters we’ll need here are:
+<code>S0</code>: starting price, which we will take as the current price of bitcoin
+<code>r</code>: expected return or average rate of growth, which in this reference would be the risk-neutral payoff (i.e. Treasury Bond)
+<code>sigma</code>: percentage volatility, in this case I’m using an annual calculation based off bitstamp which I’ll show below
+<code>z</code>: a Brownian motion, or a random sample drawn from a normal distribution with a mean = 0</p>
+
+<p><code>r</code> and <code>sigma</code> are measured on a per year basis</p>
+
+<p>Given these parameters, I’ll be using a stochastic differential equation to model bitcoin “stock” prices:</p>
+
+<p><img src="formula1.png" alt="Bitcoin stock prices" /></p>
+
+<p>Given this model, I can define a stochastic process St that follows a Geometric Brownian Motion. After some calculus and taking the derivative of the natural log of St we can arrive at a discretized formula for values of S at time t:</p>
+
+<p><img src="formula2.png" alt="Stochastic Process" /></p>
+
+<h2 id="obtain-volatility-of-bitcoin">Obtain Volatility of Bitcoin</h2>
+
+<p>A common argument against bitcoin is its volatility. Buy a few bitcoins today and a legitamate risk is that they’ll be worth half the value tomorrow. To obtain a figure for r we need to calculate the percentage volatility of bitcoin. I’ve used the standard deviation of logarithmic change for bitcoin prices on the bitstamp exchange (resampled by minute) and annualized it over the past year starting from March 1, 2013.</p>
+
+<p>Python code:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> pandas <span style="color:#f92672">as</span> pd
+<span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+
+<span style="color:#75715e"># read in bitstamp USD trade data with columns time, price, volume</span>
+bitstamp <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>read_csv(<span style="color:#e6db74">&#34;bitstampUSD.csv&#34;</span> , names<span style="color:#f92672">=</span>[<span style="color:#e6db74">&#39;time&#39;</span>, <span style="color:#e6db74">&#39;price&#39;</span>, <span style="color:#e6db74">&#39;volume&#39;</span>], index_col<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>)
+bitstamp<span style="color:#f92672">.</span>index <span style="color:#f92672">=</span> pd<span style="color:#f92672">.</span>to_datetime((bitstamp<span style="color:#f92672">.</span>index<span style="color:#f92672">.</span>values<span style="color:#f92672">*</span><span style="color:#ae81ff">1e9</span>)<span style="color:#f92672">.</span>astype(int))
+
+<span style="color:#75715e"># resample the csv data to minutely data for volume and price</span>
+volume <span style="color:#f92672">=</span> bitstamp<span style="color:#f92672">.</span>volume<span style="color:#f92672">.</span>resample(<span style="color:#e6db74">&#39;1min&#39;</span>, how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;sum&#39;</span>)
+value <span style="color:#f92672">=</span> bitstamp<span style="color:#f92672">.</span>prod(axis<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>)<span style="color:#f92672">.</span>resample(<span style="color:#e6db74">&#39;1min&#39;</span>, how<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;sum&#39;</span>)
+
+<span style="color:#75715e"># obtain the volume weighted average price</span>
+vwap <span style="color:#f92672">=</span> value <span style="color:#f92672">/</span> volume
+
+<span style="color:#75715e"># pad data with repeating values</span>
+<span style="color:#75715e"># then grab a years worth of data starting from 01 March 2013</span>
+bitstamp_pad <span style="color:#f92672">=</span> vwap<span style="color:#f92672">.</span>fillna(method<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;pad&#39;</span>, limit<span style="color:#f92672">=</span><span style="color:#ae81ff">10</span>)
+bitstamp_year <span style="color:#f92672">=</span> bitstamp_pad<span style="color:#f92672">.</span>ix[<span style="color:#e6db74">&#39;2013-03-01&#39;</span>:<span style="color:#e6db74">&#39;2014-03-01&#39;</span>]
+
+<span style="color:#75715e"># calculate the return and volatility</span>
+returns <span style="color:#f92672">=</span> np<span style="color:#f92672">.</span>log(bitstamp_year <span style="color:#f92672">/</span> bitstamp_year<span style="color:#f92672">.</span>shift(<span style="color:#ae81ff">1</span>))
+returns<span style="color:#f92672">.</span>std()<span style="color:#f92672">*</span>np<span style="color:#f92672">.</span>sqrt(returns<span style="color:#f92672">.</span>size) <span style="color:#f92672">*</span> <span style="color:#ae81ff">100</span>
+
+<span style="color:#75715e">## output: 260.70492740919627</span></code></pre></div>
+<p>Unfortunately, the tools in Julia to work with time series and datasets is not quite there yet. There is a great package called <a href="https://github.com/JuliaStats/DataFrames.jl">DataFrames.jl</a> that does a lot of data frame operations and conversions, i.e.:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">using DataFrames
+
+bitstamp <span style="color:#f92672">=</span> readtable(<span style="color:#e6db74">&#34;bitstampUSD.csv&#34;</span>, colnames <span style="color:#f92672">=</span> [<span style="color:#e6db74">&#34;time&#34;</span>, <span style="color:#e6db74">&#34;price&#34;</span>, <span style="color:#e6db74">&#34;amount&#34;</span>])</code></pre></div>
+<p>Unfortuantely, this is about as much as you can do without going into pure julia code to write your own functions to do operations like fillna or resample by time periods.</p>
+
+<p>Also, DataFrames.jl is much slower than the pandas package in reading the csv and there’s no support for indexing yet.</p>
+
+<h2 id="monte-carlo-simulation-in-python">Monte Carlo Simulation in Python</h2>
+
+<p>Note that most of the python code after this point is taken from Dr. Hilpisch and should be credited to him (<a href="http://www.hilpisch.com/YH_Derivatives_Analytics_with_Python.html">source</a>)</p>
+
+<p>Now that we have our sigma and other parameters we can run a simple monte carlo simulation in python. The code here is basically generating I number of paths that bitcoin price could take based on the formulas shown above.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#</span>
+<span style="color:#75715e"># Simulating Geometric Brownian Motion with Python</span>
+<span style="color:#75715e">#</span>
+<span style="color:#f92672">import</span> math
+<span style="color:#f92672">from</span> random <span style="color:#f92672">import</span> gauss
+
+<span style="color:#75715e"># Parameters</span>
+S0 <span style="color:#f92672">=</span> <span style="color:#ae81ff">600</span>; <span style="color:#75715e"># current bitcoin price</span>
+r <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.02</span>; <span style="color:#75715e"># risk neutral payoff, assumed 2% for this exercise, in reality probably less.</span>
+sigma <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>; <span style="color:#75715e"># extremely high sigma due to spike in bitcoin prices late last year</span>
+T <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span>; <span style="color:#75715e"># 1 Time cycle</span>
+M <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>; <span style="color:#75715e"># 100 steps</span>
+dt <span style="color:#f92672">=</span> T <span style="color:#f92672">/</span> M <span style="color:#75715e"># dt</span>
+
+<span style="color:#75715e"># Simulating I paths with M time steps</span>
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">genS_py</span>(I):
+    <span style="color:#75715e"># initialize array to hold all of our paths</span>
+    S <span style="color:#f92672">=</span> []
+    <span style="color:#75715e"># for each path i to I</span>
+    <span style="color:#66d9ef">for</span> i <span style="color:#f92672">in</span> range(I):
+        path <span style="color:#f92672">=</span> []
+        <span style="color:#75715e"># for each step t to M + 1</span>
+        <span style="color:#66d9ef">for</span> t <span style="color:#f92672">in</span> range(M <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>):
+            <span style="color:#66d9ef">if</span> t <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>:
+                <span style="color:#75715e"># append S0, our starting value to the front of the path</span>
+                path<span style="color:#f92672">.</span>append(S0)
+            <span style="color:#66d9ef">else</span>:
+                <span style="color:#75715e"># take a random normally distributed number z (mean = 0, std = 1)</span>
+                <span style="color:#75715e"># and append it to our current path</span>
+                z <span style="color:#f92672">=</span> gauss(<span style="color:#ae81ff">0.0</span>, <span style="color:#ae81ff">1.0</span>)
+                St <span style="color:#f92672">=</span> path[t <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">*</span> math<span style="color:#f92672">.</span>exp((r <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span> <span style="color:#f92672">*</span> sigma <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> dt <span style="color:#f92672">+</span> sigma <span style="color:#f92672">*</span> math<span style="color:#f92672">.</span>sqrt(dt) <span style="color:#f92672">*</span> z)
+                path<span style="color:#f92672">.</span>append(St)
+        S<span style="color:#f92672">.</span>append(path)
+    <span style="color:#66d9ef">return</span> S
+This <span style="color:#f92672">is</span> a basic Py<span style="color:#960050;background-color:#1e0010">­</span>thonic method to cre<span style="color:#960050;background-color:#1e0010">­</span>ate paths<span style="color:#f92672">.</span> If we run the sim<span style="color:#960050;background-color:#1e0010">­</span>u<span style="color:#960050;background-color:#1e0010">­</span>la<span style="color:#960050;background-color:#1e0010">­</span>tion <span style="color:#66d9ef">for</span> <span style="color:#ae81ff">100000</span> paths <span style="color:#f92672">and</span> time it:
+
+I <span style="color:#f92672">=</span> <span style="color:#ae81ff">100000</span>
+<span style="color:#f92672">%</span>time S <span style="color:#f92672">=</span> genS_py(I)
+
+<span style="color:#75715e"># CPU times: user 40.8 s, sys: 887 ms, total: 41.7 s</span>
+<span style="color:#75715e"># Wall time: 42.1 s</span></code></pre></div>
+<p>Do a simple graph in matplotlib as a sanity check</p>
+
+<p><img src="graph1.png" alt="matplotlib" /></p>
+
+<p>Either bitcoin is going to be worth a ton or it’s going to 0. Definitely checks out.</p>
+
+<h2 id="monte-carlo-simulation-in-julia">Monte Carlo Simulation in Julia</h2>
+
+<p>Now let’s try it in Julia.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia"><span style="color:#75715e">#</span>
+<span style="color:#75715e"># Simulating Geometric Brownian Motion with Julia</span>
+<span style="color:#75715e">#</span>
+
+<span style="color:#75715e"># Parameters</span>
+<span style="color:#66d9ef">const</span> S0 <span style="color:#f92672">=</span> <span style="color:#ae81ff">600</span>; <span style="color:#75715e"># current bitcoin price</span>
+<span style="color:#66d9ef">const</span> r <span style="color:#f92672">=</span> <span style="color:#ae81ff">0.02</span>; <span style="color:#75715e"># risk neutral payoff, assumed 2% for this exercise, in reality probably less.</span>
+<span style="color:#66d9ef">const</span> sigma <span style="color:#f92672">=</span> <span style="color:#ae81ff">2</span>; <span style="color:#75715e"># extremely high sigma due to spike in bitcoin prices late last year</span>
+<span style="color:#66d9ef">const</span> T <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span>; <span style="color:#75715e"># 1 Time cycle</span>
+<span style="color:#66d9ef">const</span> M <span style="color:#f92672">=</span> <span style="color:#ae81ff">100</span>; <span style="color:#75715e"># 100 steps</span>
+<span style="color:#66d9ef">const</span> dt <span style="color:#f92672">=</span> T <span style="color:#f92672">/</span> M <span style="color:#75715e"># dt</span>
+
+<span style="color:#75715e"># Simulating I paths with M time steps</span>
+<span style="color:#66d9ef">function</span> genS_jl(i<span style="color:#f92672">::</span><span style="color:#66d9ef">Int64</span>)
+    S <span style="color:#f92672">=</span> {}
+    <span style="color:#66d9ef">for</span> i <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>i
+        path <span style="color:#f92672">=</span> <span style="color:#66d9ef">Float32</span>[]
+        <span style="color:#66d9ef">for</span> t <span style="color:#66d9ef">in</span> <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span>(M <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)
+            <span style="color:#66d9ef">if</span> t <span style="color:#f92672">==</span> <span style="color:#ae81ff">1</span>
+                push!(path, S0)
+            <span style="color:#66d9ef">else</span>
+                z <span style="color:#f92672">=</span> randn()
+                st <span style="color:#f92672">=</span> path[t <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>] <span style="color:#f92672">*</span> exp((r <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span> <span style="color:#f92672">*</span> <span style="color:#f92672">^</span>(sigma,<span style="color:#ae81ff">2</span>)) <span style="color:#f92672">*</span> dt <span style="color:#f92672">+</span> sigma <span style="color:#f92672">*</span> sqrt(dt) <span style="color:#f92672">*</span> z)
+                push!(path, st)
+            <span style="color:#66d9ef">end</span>
+        <span style="color:#66d9ef">end</span>
+        push!(S,path)
+    <span style="color:#66d9ef">end</span>
+    <span style="color:#66d9ef">return</span> S
+<span style="color:#66d9ef">end</span></code></pre></div>
+<p>Julia syntax is almost the same with a couple notable differences:</p>
+
+<ul>
+<li>arrays are 1-indexed, meaning they start from 1 vs Python starting from 0</li>
+<li>the <code>randn()</code>` function is built in to generate a normally-distributed random number with mean 0 and standard deviation 1.</li>
+<li>functional operations such as <code>^()</code> vs the Pythonic <code>**</code> and <code>push!()</code> vs <code>.append()</code></li>
+<li>const declarations for global variables (10x speedup itself)</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia">I <span style="color:#f92672">=</span> <span style="color:#ae81ff">100000</span>
+<span style="color:#a6e22e">@elapsed</span> S <span style="color:#f92672">=</span> genS_jl(I)
+
+<span style="color:#75715e"># 2.243841008</span></code></pre></div>
+<p>However, when we run it, the exact same code written in Julia is faster by almost a factor of 20x! Does this mean Julia wins? In terms of speed for this particular implementation of the algorithm yes, but in reality not really. This is actually not the most efficient algorithm to model Monte Carlo Simulations in code as we will see in a couple sections.</p>
+
+<h2 id="bitcoin-call-option-valuation">Bitcoin Call Option Valuation</h2>
+
+<p>Now as part of this exercise we want to value a theoretical European call option on our bitcoin price. At maturity, a call option’s worth is calculated by</p>
+
+<p><img src="formula3.png" alt="Call option valuation" /></p>
+
+<p>where K is the strike price</p>
+
+<p>Given a strike price of K = $1000 we can calculate it in either language rather simply</p>
+
+<h3 id="python">python</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">K <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000.0</span>
+C0 <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>r <span style="color:#f92672">*</span> T) <span style="color:#f92672">*</span> sum([max(path[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">-</span> K, <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">for</span> path <span style="color:#f92672">in</span> S]) <span style="color:#f92672">/</span> I
+round(C0, <span style="color:#ae81ff">3</span>)
+
+<span style="color:#75715e"># 361.203</span></code></pre></div>
+<h3 id="julia">julia</h3>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia">K <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000.0</span>
+C0 <span style="color:#f92672">=</span> exp(<span style="color:#f92672">-</span>r <span style="color:#f92672">*</span> T) <span style="color:#f92672">*</span> sum([max(path[<span style="color:#66d9ef">end</span>] <span style="color:#f92672">-</span> K, <span style="color:#ae81ff">0</span>) <span style="color:#66d9ef">for</span> path <span style="color:#66d9ef">in</span> S]) <span style="color:#f92672">/</span> I
+round(C0, <span style="color:#ae81ff">3</span>)
+
+<span style="color:#75715e"># 374.496</span></code></pre></div>
+<p><em>note: the numbers between these two calculations converges to ~361. with a larger number of trials</em>
+there’s almost no difference between the languages here except for last object array indexing: <code>[end]</code> vs <code>[-1]</code></p>
+
+<h2 id="vectorized-mathematical-operations">Vectorized Mathematical Operations</h2>
+
+<p>There is a way to get even better speeds however by using mathematical vector calculations. Vectorization is a technique by which you perform vector operations to apply operands to multiple values at once, rather than one element at a time as a loop does. This takes advantage of compiler and hardware optimizations and results in significantly faster running code.</p>
+
+<p>The Pythonic vectorization makes use of the NumPy package.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#f92672">import</span> numpy <span style="color:#f92672">as</span> np
+<span style="color:#66d9ef">def</span> <span style="color:#a6e22e">genS_np</span>(I):
+    S <span style="color:#f92672">=</span> S0 <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>exp(np<span style="color:#f92672">.</span>cumsum((r <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span> <span style="color:#f92672">*</span> sigma <span style="color:#f92672">**</span> <span style="color:#ae81ff">2</span>) <span style="color:#f92672">*</span> dt <span style="color:#f92672">+</span> sigma <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>sqrt(dt) <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>random<span style="color:#f92672">.</span>standard_normal((M <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, I)), axis<span style="color:#f92672">=</span><span style="color:#ae81ff">0</span>))
+    S[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> S0
+    <span style="color:#66d9ef">return</span> S
+
+<span style="color:#f92672">%</span>time S <span style="color:#f92672">=</span> genS_np(I)
+
+<span style="color:#75715e"># CPU times: user 1.07 s, sys: 147 ms, total: 1.22 s</span>
+<span style="color:#75715e"># Wall time: 1.38 s</span></code></pre></div>
+<p>Wow, vectorized calculations makes it orders of magnitude faster! We can then calculate a theoretical value of an option with strike price of $1000 in a similar way as before</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python">C0 <span style="color:#f92672">=</span> math<span style="color:#f92672">.</span>exp(<span style="color:#f92672">-</span>r <span style="color:#f92672">*</span> T) <span style="color:#f92672">*</span> np<span style="color:#f92672">.</span>sum(np<span style="color:#f92672">.</span>maximum(S[<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>] <span style="color:#f92672">-</span> K, <span style="color:#ae81ff">0</span>)) <span style="color:#f92672">/</span> I
+round(C0, <span style="color:#ae81ff">3</span>)
+
+<span style="color:#75715e"># 367.457</span></code></pre></div>
+<p>We can do the exact same vectorization in julia.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia"><span style="color:#66d9ef">function</span> genS_jlvec(I)
+    S <span style="color:#f92672">=</span> S0 <span style="color:#f92672">*</span> exp(cumsum((r <span style="color:#f92672">-</span> <span style="color:#ae81ff">0.5</span> <span style="color:#f92672">*</span> <span style="color:#f92672">^</span>(sigma, <span style="color:#ae81ff">2</span>)) <span style="color:#f92672">*</span> dt <span style="color:#f92672">+</span> sigma <span style="color:#f92672">*</span> sqrt(dt) <span style="color:#f92672">*</span> randn((M <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>, I)), <span style="color:#ae81ff">1</span>))
+    S[<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#66d9ef">end</span>] <span style="color:#f92672">=</span> S0
+    <span style="color:#66d9ef">return</span> S
+<span style="color:#66d9ef">end</span>
+
+<span style="color:#a6e22e">@elapsed</span> S <span style="color:#f92672">=</span> genS_jlvec(I)
+
+<span style="color:#75715e"># 1.430265529</span></code></pre></div>
+<p>The benefit here is that we don’t need a library like numpy. We are using vanilla julia. The amazing observation to notice here, is that the naive loop-based implementation of this code in Julia is just about as fast as the vectorized implmentations! This is great especially for simply prototyping algorithms – knock out a naive implementation of some calculations and expect it to be blistering fast – a valuable proposition that python can’t offer.</p>
+
+<p>To finish up, the syntax for calculating the option value in julia is similar:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-julia" data-lang="julia">K <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000.0</span>
+C0 <span style="color:#f92672">=</span> exp(<span style="color:#f92672">-</span>r <span style="color:#f92672">*</span> T) <span style="color:#f92672">*</span> sum(max(S[<span style="color:#66d9ef">end</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#66d9ef">end</span>] <span style="color:#f92672">-</span> K, <span style="color:#ae81ff">0</span>)) <span style="color:#f92672">/</span> I
+round(C0, <span style="color:#ae81ff">3</span>)
+
+<span style="color:#75715e"># 359.783</span></code></pre></div>
+<h2 id="conclusion">Conclusion</h2>
+
+<p>Python Loops: <em>42.1 s</em>
+Julia Loops: <em>2.24 s</em>
+Python Vectorized: <em>1.38 s</em>
+Julia Vectorized: <em>1.43 s</em></p>
+
+<p><img src="speeds.png" alt="Call option valuation" /></p>
+
+<p>Julia seems to have great potential for scientific/mathematical calculations. The naive loop method of simulating the monte carlo paths of bitcoin price was much faster than the Pythonic version and on the same order of magnitude as the optimized vectorized operation. This is what I believe to be the key takeaway from this analysis: Julia doesn’t require vectorized operations to efficiently run computationally difficult problems.</p>
+
+<p>It doesn’t require external libraries like numpy for vectorized or matrix operations and has a syntax that reads extremely cleanly to any normal programmer unlike some other scientific languages that require a steeper learning curve. Speeds are definitely fast as advertised.</p>
+
+<p>Unfortunately, Julia tools for data analysis such as DataFrames.jl are not quite as mature or robust as Python’s pandas in terms of both performance and functionality. The Julia community is still young and growing so I expect to see many improvements and growth in these areas as people start contributing to the language but until then, I still see Python and pandas as the way to go.</p>
+
+<p>Everything considered, I’d still recommend you give Julia a try, even though there’s not mainstream adoption yet it’s got promise. I for one would love to start contributing to the Julia community.</p>
+
+<h2 id="files">Files</h2>
+
+<p><a href="http://rawrjustin.github.io/downloads/2014-03-18-julia-vs-python-monte-carlo-simulations-of-bitcoin-options/julia.ipynb">julia code</a><br />
+<a href="http://rawrjustin.github.io/downloads/2014-03-18-julia-vs-python-monte-carlo-simulations-of-bitcoin-options/python.ipynb">python code</a><br />
+<a href="http://rawrjustin.github.io/downloads/2014-03-18-julia-vs-python-monte-carlo-simulations-of-bitcoin-options/bitcoinvolatility.ipynb">bitcoin code</a></p>
+
+<h2 id="thanks">Thanks</h2>
+
+<p>Dr. Yves J. Hilpisch (inspiration)<br />
+Neeraj Wahi (options pricing)<br />
+James J. Porter (Julia)</p>
+
+	</p>
+
+	<div id="disqus_thread"></div>
+<script type="text/javascript">
+
+(function() {
+    
+    
+    if (window.location.hostname == "localhost")
+        return;
+
+    var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+    var disqus_shortname = 'rawrjustin';
+    dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+		</div>
+
+		<center>
+<ul class="copyright">
+  
+  <li>&copy; Justin Huang</li>
+  
+</ul>
+</center>
+<!-- Scripts -->
+<script src="https://www.rawrjustin.com/js/jquery.min.js"></script>
+<script src="https://www.rawrjustin.com/js/jquery.poptrox.min.js"></script>
+<script src="https://www.rawrjustin.com/js/skel.min.js"></script>
+<script src="https://www.rawrjustin.com/js/util.js"></script>
+
+<script src="https://www.rawrjustin.com/js/main.js"></script>
+
+
+
+
+
+	</body>
+</html>
